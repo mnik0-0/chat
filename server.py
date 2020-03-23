@@ -42,7 +42,7 @@ class Client:
         self.socket_ = socket_
         self.address = address
         self.name = self.get_data()
-        self.room = self.get_data()
+        self.room = False
 
     def get_data(self):
         try:
@@ -90,18 +90,30 @@ while True:
             sockets_list.append(client.socket_)
 
             clients[client.socket_] = client
-            print(f"Новый клиент подключился {client.address}, имя {client.name}, комната {client.room}")
-
-            if client.room not in rooms:
-                rooms[client.room] = Room(client.room, [s_socket, client.socket_], {client.name: client})
-            else:
-                rooms[client.room].update(client.socket_, {client.name: client})
+            print(f"Новый клиент подключился {client.address}, имя {client.name}")
+            print(0)
 
         else:
             client = clients[n_socket]
-            room = rooms[client.room]
-            if not room.in_room(client):
-                sockets_list.remove(client.socket_)
-                clients.pop(client.socket_)
-                if room.clients == {}:
-                    rooms.pop(room.name)
+            print(1)
+            if not client.room:
+                client.send_data("К какой комнате хотите присоединться")
+                client.get_data()
+                room_name = client.get_data()
+                if not room_name:
+                    continue
+                client.room = room_name
+
+                if room_name not in rooms:
+                    rooms[client.room] = Room(client.room, [s_socket, client.socket_], {client.name: client})
+                else:
+                    rooms[client.room].update(client.socket_, {client.name: client})
+                client.send_to_all_except_self(f"Новый пользователь присоеденился {client.name}", rooms[client.room].sockets_list)
+
+            else:
+                room = rooms[client.room]
+                if not room.in_room(client):
+                    sockets_list.remove(client.socket_)
+                    clients.pop(client.socket_)
+                    if room.clients == {}:
+                        rooms.pop(room.name)

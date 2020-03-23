@@ -64,12 +64,6 @@ while True:
         break
     print("Введите корректное имя")
 
-while True:
-    room_name = input("Введите название комнаты, чтобы продолжить: ")
-    if room_name != "":
-        break
-    print("Введите корректное имя")
-
 c_socket = socket.socket()
 
 c_socket.connect((socket.gethostname(), 9091))
@@ -77,7 +71,7 @@ c_socket.connect((socket.gethostname(), 9091))
 c_socket.setblocking(False)
 
 send_data_to(c_socket, username)
-send_data_to(c_socket, room_name)
+send_data_to(c_socket, False)
 
 
 threading.Thread(target=output_thread).start()
